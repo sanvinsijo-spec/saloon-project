@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GlamourX — Luxury Salon & Barber Management System</title>
+  <meta name="description" content="Commercial-grade Barber & Salon Management System with dynamic slot scheduling, multi-barber calendar, real-time booking, and luxury salon dashboard.">
+  
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/customer.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/barber.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+  <!-- Top Master Navigation & Role Switcher -->
+  <header class="master-header">
+    <div class="container nav-inner">
+      <div class="brand-logo" onclick="CustomerView.switchCustomerTab('book'); switchRole('customer');">
+        <div class="brand-icon">✨</div>
+        <div>
+          <div class="brand-title">GLAMOUR<span style="color: var(--gold-primary);">X</span></div>
+          <div class="brand-subtitle">LUXURY SALON & BARBER STUDIO</div>
+        </div>
+      </div>
+
+      <!-- Quick Role Switcher (Allows instant switching between Customer, Barber, and Admin) -->
+      <nav class="role-switcher">
+        <button class="role-btn active" data-role="customer">
+          <span>👤</span> Customer
+        </button>
+        <button class="role-btn" data-role="barber">
+          <span>💈</span> Barber Portal
+        </button>
+        <button class="role-btn" data-role="admin">
+          <span>👑</span> Admin Dashboard
+        </button>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <button class="icon-btn" onclick="Notifications.openDrawer()" title="Multi-channel Notifications (WhatsApp, SMS, System)">
+          🔔
+          <span class="badge-dot" id="unreadNotifBadge" style="display: none;"></span>
+        </button>
+        <button class="btn btn-sm btn-primary" onclick="switchRole('customer'); CustomerView.switchCustomerTab('book');">
+          Book Chair →
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- =========================================================================
+       1. CUSTOMER PORTAL
+       ========================================================================= -->
+  <main id="customerPortal" class="view-portal active">
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-tag">Royal Treatment • London & Milan Trained Craftsmen</div>
+        <h1 class="hero-title font-serif">Tailored Grooming for the Modern Gentleman</h1>
+        <p class="hero-subtitle">
+          Experience classic scissor craft, precision fades, and hot lather straight razor shaves in an atmosphere of quiet luxury and uncompromising attention to detail.
+        </p>
+
+        <div class="hero-features">
+          <div class="hero-feature-item"><i>✓</i> Zero Waiting Time Guarantee</div>
+          <div class="hero-feature-item"><i>✓</i> Organic Beard Tonics & Scalp Care</div>
+          <div class="hero-feature-item"><i>✓</i> Complimentary Espresso & Valet</div>
+          <div class="hero-feature-item"><i>✓</i> Instant WhatsApp Reminders</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+      <!-- Customer Sub-Tabs -->
+      <nav id="custTabsNav" class="customer-tabs"></nav>
+
+      <!-- Sub-View: 7-Step Booking Flow -->
+      <div id="custBookingSection">
+        <div class="booking-layout">
+          <!-- Left Column: Booking Wizard -->
+          <div class="wizard-container">
+            <!-- Progress Tracker -->
+            <div class="wizard-progress">
+              <div class="wizard-step active" data-step="1" onclick="CustomerView.goToStep(1)">
+                <div class="step-num">1</div>
+                <div class="step-title">Service</div>
+              </div>
+              <div class="step-divider"></div>
+
+              <div class="wizard-step" data-step="2" onclick="CustomerView.goToStep(2)">
+                <div class="step-num">2</div>
+                <div class="step-title">Barber</div>
+              </div>
+              <div class="step-divider"></div>
+
+              <div class="wizard-step" data-step="3" onclick="CustomerView.goToStep(3)">
+                <div class="step-num">3</div>
+                <div class="step-title">Date</div>
+              </div>
+              <div class="step-divider"></div>
+
+              <div class="wizard-step" data-step="4" onclick="CustomerView.goToStep(4)">
+                <div class="step-num">4</div>
+                <div class="step-title">Time</div>
+              </div>
+              <div class="step-divider"></div>
+
+              <div class="wizard-step" data-step="5" onclick="CustomerView.goToStep(5)">
+                <div class="step-num">5</div>
+                <div class="step-title">Details</div>
+              </div>
+              <div class="step-divider"></div>
+
+              <div class="wizard-step" data-step="6" onclick="CustomerView.goToStep(6)">
+                <div class="step-num">6</div>
+                <div class="step-title">Review</div>
+              </div>
+            </div>
+
+            <!-- STEP 1: Select Service -->
+            <div id="stepPane1" class="step-pane active">
+              <div class="step-header">
+                <h3 class="step-heading font-serif">Step 1: Select Your Grooming Ritual</h3>
+                <p class="step-desc">Each service is crafted with precision. Service duration automatically regulates available appointment slots.</p>
+              </div>
+
+              <!-- Categories -->
+              <div class="category-filter">
+                <button class="cat-btn active" data-category="All">All Services</button>
+                <button class="cat-btn" data-category="Haircut">Haircuts</button>
+                <button class="cat-btn" data-category="Combos">Combos</button>
+                <button class="cat-btn" data-category="Shave">Shaves</button>
+                <button class="cat-btn" data-category="Beard">Beard Care</button>
+                <button class="cat-btn" data-category="Styling">Styling</button>
+                <button class="cat-btn" data-category="Treatments">Treatments</button>
+              </div>
+
+              <div id="servicesListContainer" class="services-grid"></div>
+            </div>
+
+            <!-- STEP 2: Select Barber -->
+            <div id="stepPane2" class="step-pane">
+              <div class="step-header">
+                <h3 class="step-heading font-serif">Step 2: Choose Your Barber</h3>
+                <p class="step-desc">Pick your preferred craftsman or select "Any Available Barber" for the earliest open chair.</p>
+              </div>
+              <div id="barbersListContainer" class="barbers-grid"></div>
+            </div>
+
+            <!-- STEP 3: Select Date -->
+            <div id="stepPane3" class="step-pane">
+              <div class="step-header">
+                <h3 class="step-heading font-serif">Step 3: Select Appointment Date</h3>
+                <p class="step-desc">Choose a date over the next 14 days or pick a specific date below.</p>
+              </div>
+
+              <div class="date-selector-container">
+                <div id="dateChipsContainer" class="date-chips-wrap"></div>
+                <div style="max-width: 240px; margin-top: 10px;">
+                  <label class="form-label">Or Pick Specific Date:</label>
+                  <input type="date" id="customBookingDate" class="form-control">
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4: Select Available Time Slot -->
+            <div id="stepPane4" class="step-pane">
+              <div class="step-header">
+                <h3 class="step-heading font-serif">Step 4: Select Available Time Slot</h3>
+                <p class="step-desc">Our intelligent scheduler computes barber shifts, duration, buffer times, and breaks in real time.</p>
+              </div>
+
+              <div class="slots-container">
+                <div class="slot-legend">
+                  <div class="legend-item"><div class="legend-color legend-avail"></div> Open Slot</div>
+                  <div class="legend-item"><div class="legend-color legend-booked"></div> Booked / Overlapping</div>
+                  <div class="legend-item"><div class="legend-color legend-break"></div> Staff Break</div>
+                </div>
+
+                <div id="availableSlotsGrid" class="slots-grid"></div>
+              </div>
+            </div>
+
+            <!-- STEP 5: Enter Customer Details -->
+            <div id="stepPane5" class="step-pane">
+              <div class="step-header">
+                <h3 class="step-heading font-serif">Step 5: Customer Details</h3>
+                <p class="step-desc">We respect your privacy and only collect details necessary for your reservation and SMS/WhatsApp confirmation.</p>
+              </div>
+
+              <div class="card">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div class="form-group">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" id="custInputName" class="form-control" placeholder="e.g. Vikram Malhotra">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Phone Number (WhatsApp) *</label>
+                    <input type="tel" id="custInputPhone" class="form-control" placeholder="e.g. +91 98201 11223">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" id="custInputEmail" class="form-control" placeholder="e.g. vikram.m@gmail.com">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Special Requests / Hair & Skin Notes</label>
+                  <textarea id="custInputNotes" class="form-control" rows="3" placeholder="e.g. Sensitive neck skin, prefers low skin taper fade, matte clay finish."></textarea>
+                </div>
+
+                <button class="btn btn-primary" style="margin-top: 10px;" onclick="CustomerView.goToNextStep()">
+                  Proceed to Review & Payment →
+                </button>
+              </div>
+            </div>
+
+            <!-- STEP 6: Review & Promo Code -->
+            <div id="stepPane6" class="step-pane">
+              <div class="step-header">
+                <h3 class="step-heading font-serif">Step 6: Review Booking & Select Payment</h3>
+                <p class="step-desc">Confirm your reservation details and choose your preferred settlement option.</p>
+              </div>
+
+              <div class="card" style="margin-bottom: 24px;">
+                <h4 style="margin-bottom: 16px;">Select Payment Option</h4>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <label style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); cursor: pointer;">
+                    <input type="radio" name="paymentOption" value="shop" checked onchange="State.updateBookingDraft({ paymentMethod: 'shop', isAdvance: false })">
+                    <div>
+                      <strong>Pay at Shop</strong>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">Settle in person via Cash, Card, or UPI after your service.</div>
+                    </div>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); cursor: pointer;">
+                    <input type="radio" name="paymentOption" value="online" onchange="State.updateBookingDraft({ paymentMethod: 'online_upi', isAdvance: false })">
+                    <div>
+                      <strong>Online Payment (Razorpay Test Gateway)</strong>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">Instant confirmation via UPI (GPay, PhonePe, Paytm) or Credit/Debit Card.</div>
+                    </div>
+                  </label>
+
+                  <label style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.02); padding: 14px; border-radius: 8px; border: 1px solid var(--border-subtle); cursor: pointer;">
+                    <input type="radio" name="paymentOption" value="advance" onchange="State.updateBookingDraft({ paymentMethod: 'advance_token', isAdvance: true })">
+                    <div>
+                      <strong>Partial Advance Deposit (25% Token)</strong>
+                      <div style="font-size: 0.8rem; color: var(--text-muted);">Secure slot with ₹150 deposit, pay remainder at parlor.</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="card">
+                <h4 style="margin-bottom: 12px;">Apply Promotional Voucher</h4>
+                <div class="coupon-apply-wrap">
+                  <input type="text" id="promoCodeInput" class="form-control" placeholder="Try: FIRST15, ROYAL100, GENTLEMAN20">
+                  <button class="btn btn-secondary" onclick="CustomerView.applyCoupon()">Apply</button>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-dim);">Available Demo Codes: <strong>FIRST15</strong> (15% off), <strong>ROYAL100</strong> (₹100 flat off)</div>
+              </div>
+            </div>
+
+            <!-- STEP 7: Confirmation Receipt Pane -->
+            <div id="stepPane7" class="step-pane">
+              <div id="bookingConfirmationView"></div>
+            </div>
+          </div>
+
+          <!-- Right Column: Live Sticky Summary Card -->
+          <aside class="live-summary-card">
+            <div class="summary-header">
+              <div class="summary-title">BOOKING SUMMARY</div>
+            </div>
+
+            <div class="summary-items-list">
+              <div class="summary-item-row">
+                <span class="summary-item-label">Service:</span>
+                <span id="liveSummaryService" class="summary-item-val">Select service</span>
+              </div>
+              <div class="summary-item-row">
+                <span class="summary-item-label">Duration:</span>
+                <span id="liveSummaryDuration" class="summary-item-val">—</span>
+              </div>
+              <div class="summary-item-row">
+                <span class="summary-item-label">Master Barber:</span>
+                <span id="liveSummaryBarber" class="summary-item-val">Any Available</span>
+              </div>
+              <div class="summary-item-row">
+                <span class="summary-item-label">Date:</span>
+                <span id="liveSummaryDate" class="summary-item-val">Choose date</span>
+              </div>
+              <div class="summary-item-row">
+                <span class="summary-item-label">Time Slot:</span>
+                <span id="liveSummaryTime" class="summary-item-val">Choose slot</span>
+              </div>
+            </div>
+
+            <div class="summary-price-box">
+              <div class="price-row">
+                <span>Subtotal:</span>
+                <span id="liveSummarySubtotal">₹0</span>
+              </div>
+              <div id="liveSummaryDiscountRow" class="price-row" style="display: none; color: #10b981;">
+                <span>Discount:</span>
+                <span id="liveSummaryDiscount">-₹0</span>
+              </div>
+              <div class="price-row total-row">
+                <span>Total Due:</span>
+                <span id="liveSummaryTotal">₹0</span>
+              </div>
+            </div>
+
+            <button id="liveSummaryActionBtn" class="btn btn-primary btn-wizard-action">
+              Next Step →
+            </button>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Sub-View: My Appointments -->
+      <div id="custMyApptsSection" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <div>
+            <h2 class="font-serif">My Appointments</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">View upcoming reservations, reschedule, cancel, or leave reviews for completed sessions.</p>
+          </div>
+          <button class="btn btn-primary" onclick="CustomerView.switchCustomerTab('book')">+ New Booking</button>
+        </div>
+        <div id="myAppointmentsGrid" class="my-appointments-grid"></div>
+      </div>
+
+      <!-- Sub-View: Services Catalog -->
+      <div id="custServicesCatalogSection" style="display: none;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 class="font-serif">The Gentlemen's Grooming Menu</h2>
+          <p style="color: var(--text-muted);">Craftsmanship meets luxury. Every session includes hot towels and custom consultation.</p>
+        </div>
+        <div id="servicesCatalogGrid" class="services-grid"></div>
+      </div>
+
+      <!-- Sub-View: Client Reviews -->
+      <div id="custReviewsSection" style="display: none;">
+        <div style="text-align: center; margin-bottom: 32px;">
+          <h2 class="font-serif">Verified Client Experiences</h2>
+          <p style="color: var(--text-muted);">Read genuine reviews from distinguished gentlemen across Bangalore.</p>
+        </div>
+        <div id="reviewsCatalogGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       2. BARBER PORTAL
+       ========================================================================= -->
+  <main id="barberPortal" class="view-portal">
+    <div class="container" style="padding-top: 30px;">
+      <!-- Barber Switcher & Hero -->
+      <div class="barber-hero-card">
+        <div class="barber-profile-summary">
+          <img id="barberHeroPhoto" class="barber-large-avatar" src="" alt="Barber">
+          <div>
+            <h2 id="barberHeroName" class="font-serif" style="margin-bottom: 2px;"></h2>
+            <div id="barberHeroTitle" style="color: var(--gold-primary); font-size: 0.85rem; font-weight: 600;"></div>
+            <div id="barberHeroRating" style="font-size: 0.8rem; color: var(--gold-light); margin-top: 4px;"></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div>
+            <label class="form-label" style="margin-bottom: 4px;">Active Barber Profile:</label>
+            <select id="barberSelectDropdown" class="form-control" style="width: 250px;"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barber KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap">👥</div>
+          <div>
+            <div class="kpi-label">Today's Clients</div>
+            <div id="barberTodayClients" class="kpi-value">0</div>
+            <div class="kpi-sub">Assigned bookings today</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap">💵</div>
+          <div>
+            <div class="kpi-label">Today's Commission</div>
+            <div id="barberTodayEarnings" class="kpi-value">₹0</div>
+            <div class="kpi-sub">Calculated barber payout</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap">✂️</div>
+          <div>
+            <div class="kpi-label">Completed Sessions</div>
+            <div id="barberTotalCompleted" class="kpi-value">0</div>
+            <div class="kpi-sub">All-time satisfied clients</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap">📊</div>
+          <div>
+            <div class="kpi-label">Commission Rate</div>
+            <div id="barberCommissionRate" class="kpi-value">40%</div>
+            <div class="kpi-sub">Of gross service value</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barber Active Queue -->
+      <div class="barber-queue-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <h3 class="font-serif">Today's Service Queue</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Update appointment status in real-time as clients take the chair.</p>
+          </div>
+          <button class="btn btn-sm btn-secondary" onclick="BarberView.loadBarberProfile()">🔄 Refresh Queue</button>
+        </div>
+
+        <div id="barberTodayQueueList" class="queue-card-list"></div>
+      </div>
+
+      <!-- Barber Working Hours & Availability -->
+      <div class="card" style="margin-top: 32px; margin-bottom: 60px;">
+        <h3 class="font-serif" style="margin-bottom: 16px;">My Weekly Schedule & Breaks</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Your defined working hours automatically shape available slots on the customer booking portal.</p>
+        <div id="barberAvailabilityContainer"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       3. ADMIN / OWNER PORTAL
+       ========================================================================= -->
+  <main id="adminPortal" class="view-portal">
+    <div class="container" style="padding-top: 24px;">
+      <!-- Admin Header Bar & Quick Actions -->
+      <div class="admin-header-bar">
+        <div>
+          <h1 class="font-serif" style="font-size: 1.8rem;">Proprietor Management Portal</h1>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Full business oversight, slot management, team performance, and customer relations.</p>
+        </div>
+
+        <!-- Dashboard Quick Actions as requested in Prompt -->
+        <div class="quick-actions-bar">
+          <button class="btn btn-sm btn-primary" onclick="AdminView.openManualBookingModal()">+ New Appointment</button>
+          <button class="btn btn-sm btn-secondary" onclick="document.getElementById('addCustomerModal').classList.add('open')">+ Add Customer</button>
+          <button class="btn btn-sm btn-secondary" onclick="document.getElementById('addBarberModal').classList.add('open')">+ Add Barber</button>
+          <button class="btn btn-sm btn-secondary" onclick="document.getElementById('addServiceModal').classList.add('open')">+ Add Service</button>
+        </div>
+      </div>
+
+      <!-- Admin Navigation Tabs -->
+      <nav class="admin-nav-tabs">
+        <button class="admin-tab-btn active" data-tab="dashboard">📊 Dashboard</button>
+        <button class="admin-tab-btn" data-tab="appointments">📅 Appointments</button>
+        <button class="admin-tab-btn" data-tab="calendar">🗓 Calendar (Day/Week/Month)</button>
+        <button class="admin-tab-btn" data-tab="customers">👥 Customers</button>
+        <button class="admin-tab-btn" data-tab="barbers">💈 Barbers</button>
+        <button class="admin-tab-btn" data-tab="services">✂️ Services</button>
+        <button class="admin-tab-btn" data-tab="coupons">🏷 Coupons & Offers</button>
+        <button class="admin-tab-btn" data-tab="reviews">★ Review Moderation</button>
+        <button class="admin-tab-btn" data-tab="settings">⚙️ Shop Settings</button>
+      </nav>
+
+      <!-- TAB 1: Dashboard Overview -->
+      <div id="dashOverviewPane">
+        <!-- 8 KPI Metrics Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap">📅</div>
+            <div>
+              <div class="kpi-label">Today's Bookings</div>
+              <div id="kpiTodayAppts" class="kpi-value">0</div>
+              <div class="kpi-sub">Total reservations today</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap">💵</div>
+            <div>
+              <div class="kpi-label">Today's Revenue</div>
+              <div id="kpiTodayRevenue" class="kpi-value" style="color: var(--gold-light);">₹0</div>
+              <div class="kpi-sub">Completed services today</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap">📈</div>
+            <div>
+              <div class="kpi-label">Monthly Revenue</div>
+              <div id="kpiMonthlyRevenue" class="kpi-value" style="color: var(--gold-light);">₹0</div>
+              <div class="kpi-sub">Current calendar month</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap">👥</div>
+            <div>
+              <div class="kpi-label">Total Customers</div>
+              <div id="kpiTotalCustomers" class="kpi-value">0</div>
+              <div class="kpi-sub">Registered gentlemen</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap" style="color: #10b981;">✅</div>
+            <div>
+              <div class="kpi-label">Completed</div>
+              <div id="kpiCompleted" class="kpi-value">0</div>
+              <div class="kpi-sub">Successfully serviced</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap" style="color: #ef4444;">❌</div>
+            <div>
+              <div class="kpi-label">Cancelled</div>
+              <div id="kpiCancelled" class="kpi-value">0</div>
+              <div class="kpi-sub">Released back to pool</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap" style="color: #8b5cf6;">⚠️</div>
+            <div>
+              <div class="kpi-label">No-Shows</div>
+              <div id="kpiNoShows" class="kpi-value">0</div>
+              <div class="kpi-sub">Unattended bookings</div>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-icon-wrap">💈</div>
+            <div>
+              <div class="kpi-label">All-Time Bookings</div>
+              <div id="kpiTotalBookings" class="kpi-value">0</div>
+              <div class="kpi-sub">System lifetime volume</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Grid: Revenue Trend & Popular Services -->
+        <div class="dash-analytics-grid">
+          <!-- 7-Day Revenue Trend SVG Chart -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">7-Day Revenue Trend (₹)</h3>
+                <div style="font-size: 0.8rem; color: var(--text-dim);">Gross salon revenue per day</div>
+              </div>
+              <span class="badge badge-confirmed">Live Analytics</span>
+            </div>
+            <div id="revenueChartSvg" class="svg-chart-container"></div>
+          </div>
+
+          <!-- Popular Services Ranking -->
+          <div class="chart-card">
+            <div class="chart-header">
+              <h3 class="chart-title">Most Popular Services</h3>
+            </div>
+            <div id="dashPopularServicesList"></div>
+          </div>
+        </div>
+
+        <!-- Barber Performance List -->
+        <div class="card" style="margin-bottom: 28px;">
+          <h3 class="font-serif" style="margin-bottom: 16px;">Barber Performance & Commission Ledger</h3>
+          <div id="dashBarberPerfList" class="barber-perf-list"></div>
+        </div>
+
+        <!-- Today's Queue Preview -->
+        <div class="card" style="margin-bottom: 40px;">
+          <h3 class="font-serif" style="margin-bottom: 16px;">Today's Complete Schedule</h3>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Booking Ref</th>
+                  <th>Time</th>
+                  <th>Customer</th>
+                  <th>Service</th>
+                  <th>Assigned Barber</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashTodayApptsTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Appointments Management -->
+      <div id="dashApptsPane" style="display: none;">
+        <div class="card" style="margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Search Client or Code</label>
+              <input type="text" id="filterApptSearch" class="form-control" placeholder="Search by name, phone, code..." oninput="AdminView.loadAppointmentsList()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Filter by Date</label>
+              <input type="date" id="filterApptDate" class="form-control" onchange="AdminView.loadAppointmentsList()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Filter by Status</label>
+              <select id="filterApptStatus" class="form-control" onchange="AdminView.loadAppointmentsList()">
+                <option value="all">All Statuses</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="in_progress">In-Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="no_show">No-Show</option>
+              </select>
+            </div>
+            <div>
+              <button class="btn btn-secondary" onclick="document.getElementById('filterApptDate').value=''; document.getElementById('filterApptStatus').value='all'; document.getElementById('filterApptSearch').value=''; AdminView.loadAppointmentsList();">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom: 40px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Booking Ref</th>
+                <th>Client</th>
+                <th>Service</th>
+                <th>Barber</th>
+                <th>Date & Time</th>
+                <th>Price / Status</th>
+                <th>Update Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminApptsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: Calendar View -->
+      <div id="dashCalendarPane" style="display: none;">
+        <div class="calendar-view-header">
+          <div class="calendar-controls">
+            <button class="cal-nav-btn" onclick="AdminView.calNav(-1)">◀ Prev Month</button>
+            <h3 id="calMonthYearLabel" class="font-serif" style="margin: 0 10px;"></h3>
+            <button class="cal-nav-btn" onclick="AdminView.calNav(1)">Next Month ▶</button>
+          </div>
+          <div class="cal-mode-pills">
+            <button class="cal-mode-btn active">Month View</button>
+          </div>
+        </div>
+
+        <div id="adminCalendarContainer" style="margin-bottom: 40px;"></div>
+      </div>
+
+      <!-- TAB 4: Customers Management -->
+      <div id="dashCustomersPane" style="display: none;">
+        <div class="card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 14px;">
+          <input type="text" id="adminCustSearchInput" class="form-control" style="max-width: 380px;" placeholder="Search customers by name, phone or email..." oninput="AdminView.loadCustomers(this.value)">
+          <button class="btn btn-primary" onclick="document.getElementById('addCustomerModal').classList.add('open')">+ Add New Customer</button>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom: 40px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Visits</th>
+                <th>Total Spent</th>
+                <th>Internal Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminCustomersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: Barbers Management -->
+      <div id="dashBarbersPane" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div>
+            <h3 class="font-serif">Our Team of Master Barbers</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Manage staff profiles, commissions, and working hours.</p>
+          </div>
+          <button class="btn btn-primary" onclick="document.getElementById('addBarberModal').classList.add('open')">+ Add Barber</button>
+        </div>
+        <div id="adminBarbersGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px;"></div>
+      </div>
+
+      <!-- TAB 6: Services Management -->
+      <div id="dashServicesPane" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div>
+            <h3 class="font-serif">Services & Pricing Architecture</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Durations configured here directly determine dynamic booking slot availability.</p>
+          </div>
+          <button class="btn btn-primary" onclick="document.getElementById('addServiceModal').classList.add('open')">+ Add Service</button>
+        </div>
+        <div id="adminServicesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin-bottom: 40px;"></div>
+      </div>
+
+      <!-- TAB 7: Coupons Management -->
+      <div id="dashCouponsPane" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div>
+            <h3 class="font-serif">Promotional Coupons & Special Offers</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">Configure flat or percentage discounts with minimum order thresholds.</p>
+          </div>
+          <button class="btn btn-primary" onclick="document.getElementById('addCouponModal').classList.add('open')">+ Create Coupon</button>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom: 40px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Min Spend</th>
+                <th>Expiry</th>
+                <th>Usage</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminCouponsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 8: Reviews Moderation -->
+      <div id="dashReviewsPane" style="display: none;">
+        <div style="margin-bottom: 20px;">
+          <h3 class="font-serif">Client Reviews Moderation</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Moderate and approve testimonials before displaying them on the public portal.</p>
+        </div>
+
+        <div class="table-responsive" style="margin-bottom: 40px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Barber</th>
+                <th>Service</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Status</th>
+                <th>Moderation</th>
+              </tr>
+            </thead>
+            <tbody id="adminReviewsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 9: Shop Settings -->
+      <div id="dashSettingsPane" style="display: none;">
+        <div class="card" style="margin-bottom: 28px;">
+          <h3 class="font-serif" style="margin-bottom: 18px;">Operating Parameters & Slot Algorithm</h3>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label class="form-label">Shop Name</label>
+              <input type="text" id="setShopName" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Concierge Phone</label>
+              <input type="text" id="setShopPhone" class="form-control">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+              <label class="form-label">Official Email</label>
+              <input type="email" id="setShopEmail" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Shop Address</label>
+              <input type="text" id="setShopAddress" class="form-control">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">Slot Interval (Minutes)</label>
+              <select id="setSlotInterval" class="form-control">
+                <option value="15">15 Minutes</option>
+                <option value="30">30 Minutes (Recommended)</option>
+                <option value="45">45 Minutes</option>
+                <option value="60">60 Minutes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Buffer Time Between Slots (Minutes)</label>
+              <select id="setBufferTime" class="form-control">
+                <option value="0">0 Minutes (No buffer)</option>
+                <option value="5">5 Minutes</option>
+                <option value="10">10 Minutes</option>
+                <option value="15">15 Minutes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Opening Time</label>
+              <input type="time" id="setOpeningTime" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Closing Time</label>
+              <input type="time" id="setClosingTime" class="form-control">
+            </div>
+          </div>
+
+          <button class="btn btn-primary" style="margin-top: 10px;" onclick="AdminView.saveShopSettings()">
+            Save Configuration Changes
+          </button>
+        </div>
+
+        <!-- Holidays & Closed Days -->
+        <div class="card" style="margin-bottom: 40px;">
+          <h3 class="font-serif" style="margin-bottom: 14px;">Holidays & Closed Days</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 18px;">Dates added here automatically lock out booking slots across all barbers.</p>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+            <input type="date" id="newHolidayDate" class="form-control" style="max-width: 200px;">
+            <input type="text" id="newHolidayDesc" class="form-control" style="max-width: 320px;" placeholder="Holiday Name (e.g. Diwali, Christmas)">
+            <button class="btn btn-secondary" onclick="AdminView.addHoliday()">+ Add Holiday</button>
+          </div>
+
+          <div id="adminHolidaysList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- =========================================================================
+       MODALS & OVERLAYS
+       ========================================================================= -->
+
+  <!-- 1. Reschedule Modal -->
+  <div id="rescheduleModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Reschedule Appointment</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="rescheduleApptId">
+        <input type="hidden" id="rescheduleNewTime">
+        <div id="rescheduleCurrentInfo" style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem;"></div>
+        
+        <div class="form-group">
+          <label class="form-label">Select New Date</label>
+          <input type="date" id="rescheduleNewDate" class="form-control">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Available Slots</label>
+          <div id="rescheduleSlotsGrid" class="slots-grid" style="max-height: 200px; overflow-y: auto;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="CustomerView.submitReschedule()">Confirm New Slot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Customer Profile & Notes Modal -->
+  <div id="customerProfileModal" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 650px;">
+      <div class="modal-header">
+        <h3 class="font-serif">Client Profile & History</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="custProfileId">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div>Name: <strong id="custProfileName"></strong></div>
+          <div>Phone: <strong id="custProfilePhone"></strong></div>
+          <div>Email: <strong id="custProfileEmail"></strong></div>
+          <div>Favorite: <strong id="custProfileFav" style="color: var(--gold-light);"></strong></div>
+          <div style="grid-column: 1/-1;">Lifetime Spending: <strong id="custProfileSpend" style="color: var(--gold-light);"></strong></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Internal Concierge Notes</label>
+          <textarea id="custProfileNotesInput" class="form-control" rows="3"></textarea>
+        </div>
+
+        <h4 style="margin: 16px 0 8px; font-size: 0.95rem;">Appointment History</h4>
+        <div class="table-responsive" style="max-height: 180px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Ref</th>
+                <th>Service</th>
+                <th>Barber</th>
+                <th>Date</th>
+                <th>Price</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="custProfileHistoryTable"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Close</button>
+        <button class="btn btn-primary" onclick="AdminView.saveCustomerNotes()">Save Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Leave Review Modal -->
+  <div id="reviewModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Share Your Experience</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reviewApptId">
+        <input type="hidden" id="reviewRatingVal" value="5">
+
+        <label class="form-label">Rating</label>
+        <div id="reviewStarsContainer" class="star-rating">
+          <span class="star" data-val="1">★</span>
+          <span class="star" data-val="2">★</span>
+          <span class="star" data-val="3">★</span>
+          <span class="star" data-val="4">★</span>
+          <span class="star" data-val="5">★</span>
+        </div>
+
+        <div class="form-group" style="margin-top: 14px;">
+          <label class="form-label">Your Review / Remarks</label>
+          <textarea id="reviewCommentInput" class="form-control" rows="4" placeholder="How was the haircut, beard sculpt, or hot towel service?"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="CustomerView.submitReview()">Submit Review</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Razorpay-style Mock Payment Checkout Modal -->
+  <div id="razorpayModal" class="modal-overlay">
+    <div class="modal-dialog razorpay-modal" style="max-width: 440px;">
+      <div class="rp-header">
+        <div class="rp-logo">
+          <span>⚡</span> Razorpay Test Checkout
+        </div>
+        <div class="rp-amount-display">
+          <div style="font-size: 0.75rem; color: #8b94b2;">Total Payable</div>
+          <div id="rpAmountDisplay" class="rp-amount">₹0</div>
+        </div>
+      </div>
+
+      <div class="rp-tabs">
+        <button class="rp-tab active">UPI / QR Code</button>
+        <button class="rp-tab">Card</button>
+        <button class="rp-tab">NetBanking</button>
+      </div>
+
+      <div class="rp-body">
+        <div class="upi-qr-preview">
+          <!-- Dynamic QR preview -->
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=upi://pay?pa=noblecut@okaxis&pn=TheNobleCut" alt="UPI QR" style="width: 130px; height: 130px;">
+          <div style="font-size: 0.72rem; color: #333; margin-top: 6px; font-weight: 700;">Scan with any UPI App</div>
+        </div>
+
+        <div class="upi-apps">
+          <div class="upi-app-icon">GPay</div>
+          <div class="upi-app-icon">PhonePe</div>
+          <div class="upi-app-icon">Paytm</div>
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%; background: #3395ff; color: #fff; border: none;" onclick="CustomerView.simulateRazorpaySuccess()">
+          Simulate Instant Test Payment ✓
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Manual Appointment Modal (Admin) -->
+  <div id="manualBookingModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Manual Appointment Booking</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Service</label>
+          <select id="manualServiceSelect" class="form-control"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Barber</label>
+          <select id="manualBarberSelect" class="form-control"></select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" id="manualApptDate" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Start Time (HH:MM)</label>
+            <input type="time" id="manualApptTime" class="form-control">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Customer Name</label>
+            <input type="text" id="manualCustomerName" class="form-control" placeholder="Full Name">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Customer Phone</label>
+            <input type="tel" id="manualCustomerPhone" class="form-control" placeholder="+91...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Special Notes</label>
+          <input type="text" id="manualNotes" class="form-control" placeholder="Walk-in, VIP, etc.">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="AdminView.submitManualBooking()">Create Appointment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Add Customer Modal (Admin) -->
+  <div id="addCustomerModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Add New Customer</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Customer Name *</label>
+          <input type="text" id="newCustName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number *</label>
+          <input type="tel" id="newCustPhone" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" id="newCustEmail" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Internal Notes</label>
+          <textarea id="newCustNotes" class="form-control" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="
+          const name = document.getElementById('newCustName').value.trim();
+          const phone = document.getElementById('newCustPhone').value.trim();
+          const email = document.getElementById('newCustEmail').value.trim();
+          const notes = document.getElementById('newCustNotes').value.trim();
+          if(!name || !phone) { Notifications.showToast('warning', 'Required', 'Name and Phone required.'); return; }
+          API.createCustomer({ name, phone, email, notes }).then(() => {
+            Notifications.showToast('success', 'Customer Added', name + ' created.');
+            document.getElementById('addCustomerModal').classList.remove('open');
+            AdminView.loadCustomers();
+          }).catch(e => Notifications.showToast('error', 'Error', e.message));
+        ">Add Customer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Add Barber Modal (Admin) -->
+  <div id="addBarberModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Add New Master Barber</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Barber Full Name *</label>
+          <input type="text" id="newBarberName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title / Role *</label>
+          <input type="text" id="newBarberTitle" class="form-control" placeholder="e.g. Master Craftsman & Stylist">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialization</label>
+          <input type="text" id="newBarberSpec" class="form-control" placeholder="e.g. Skin Fades & Straight Razor">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" id="newBarberPhone" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Commission %</label>
+            <input type="number" id="newBarberCommission" class="form-control" value="40">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Photo URL</label>
+          <input type="url" id="newBarberPhoto" class="form-control" value="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="
+          const name = document.getElementById('newBarberName').value.trim();
+          const title = document.getElementById('newBarberTitle').value.trim();
+          const spec = document.getElementById('newBarberSpec').value.trim();
+          const phone = document.getElementById('newBarberPhone').value.trim();
+          const comm = parseFloat(document.getElementById('newBarberCommission').value);
+          const photo = document.getElementById('newBarberPhoto').value.trim();
+          if(!name || !title) { Notifications.showToast('warning', 'Required', 'Name and Title required.'); return; }
+          API.createBarber({ name, title, specialization: spec, phone, commission_pct: comm, photo_url: photo }).then(() => {
+            Notifications.showToast('success', 'Barber Added', name + ' has joined the team.');
+            document.getElementById('addBarberModal').classList.remove('open');
+            AdminView.loadBarbersList();
+            CustomerView.loadInitialData();
+          }).catch(e => Notifications.showToast('error', 'Error', e.message));
+        ">Add Barber</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Edit Barber Modal (Admin) -->
+  <div id="editBarberModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Edit Barber Profile</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editBarberId">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" id="editBarberName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" id="editBarberTitle" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Specialization</label>
+          <input type="text" id="editBarberSpec" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Commission %</label>
+          <input type="number" id="editBarberCommission" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Photo URL</label>
+          <input type="url" id="editBarberPhoto" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="AdminView.submitEditBarber()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Add Service Modal (Admin) -->
+  <div id="addServiceModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Add New Grooming Service</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Service Name *</label>
+          <input type="text" id="newServiceName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="newServiceDesc" class="form-control" rows="2"></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Price (₹) *</label>
+            <input type="number" id="newServicePrice" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration (Minutes) *</label>
+            <input type="number" id="newServiceDuration" class="form-control" value="30">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="newServiceCategory" class="form-control">
+            <option value="Haircut">Haircut</option>
+            <option value="Combos">Combos</option>
+            <option value="Shave">Shave</option>
+            <option value="Beard">Beard</option>
+            <option value="Styling">Styling</option>
+            <option value="Treatments">Treatments</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Image URL</label>
+          <input type="url" id="newServiceImage" class="form-control" value="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500&auto=format&fit=crop&q=80">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="
+          const name = document.getElementById('newServiceName').value.trim();
+          const desc = document.getElementById('newServiceDesc').value.trim();
+          const price = parseFloat(document.getElementById('newServicePrice').value);
+          const dur = parseInt(document.getElementById('newServiceDuration').value, 10);
+          const cat = document.getElementById('newServiceCategory').value;
+          const img = document.getElementById('newServiceImage').value.trim();
+          if(!name || !price || !dur) { Notifications.showToast('warning', 'Required', 'Name, Price and Duration required.'); return; }
+          API.createService({ name, description: desc, price, duration: dur, category: cat, image_url: img }).then(() => {
+            Notifications.showToast('success', 'Service Added', name + ' created.');
+            document.getElementById('addServiceModal').classList.remove('open');
+            AdminView.loadServicesList();
+            CustomerView.loadInitialData();
+          }).catch(e => Notifications.showToast('error', 'Error', e.message));
+        ">Add Service</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Edit Service Modal (Admin) -->
+  <div id="editServiceModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Edit Service</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editServiceId">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" id="editServiceName" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="editServiceDesc" class="form-control" rows="2"></textarea>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Price (₹)</label>
+            <input type="number" id="editServicePrice" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration (Mins)</label>
+            <input type="number" id="editServiceDuration" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <select id="editServiceCategory" class="form-control">
+            <option value="Haircut">Haircut</option>
+            <option value="Combos">Combos</option>
+            <option value="Shave">Shave</option>
+            <option value="Beard">Beard</option>
+            <option value="Styling">Styling</option>
+            <option value="Treatments">Treatments</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Image URL</label>
+          <input type="url" id="editServiceImage" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="AdminView.submitEditService()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Add Coupon Modal (Admin) -->
+  <div id="addCouponModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="font-serif">Create Promotional Coupon</h3>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Coupon Code *</label>
+          <input type="text" id="newCouponCode" class="form-control" placeholder="e.g. VIP25">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Discount Type</label>
+            <select id="newCouponType" class="form-control">
+              <option value="percent">Percentage (%)</option>
+              <option value="fixed">Fixed Amount (₹)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Discount Value</label>
+            <input type="number" id="newCouponValue" class="form-control" placeholder="e.g. 25">
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Min Order Spend (₹)</label>
+            <input type="number" id="newCouponMinSpend" class="form-control" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Usage Limit</label>
+            <input type="number" id="newCouponLimit" class="form-control" value="100">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiry Date</label>
+          <input type="date" id="newCouponExpiry" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary close-modal-btn">Cancel</button>
+        <button class="btn btn-primary" onclick="
+          const code = document.getElementById('newCouponCode').value.trim();
+          const type = document.getElementById('newCouponType').value;
+          const val = parseFloat(document.getElementById('newCouponValue').value);
+          const min = parseFloat(document.getElementById('newCouponMinSpend').value || 0);
+          const limit = parseInt(document.getElementById('newCouponLimit').value || 100, 10);
+          const exp = document.getElementById('newCouponExpiry').value || null;
+          if(!code || !val) { Notifications.showToast('warning', 'Required', 'Code and Value required.'); return; }
+          API.createCoupon({ code, discount_type: type, discount_value: val, min_spend: min, usage_limit: limit, expiry_date: exp }).then(() => {
+            Notifications.showToast('success', 'Coupon Created', code + ' is now active.');
+            document.getElementById('addCouponModal').classList.remove('open');
+            AdminView.loadCoupons();
+          }).catch(e => Notifications.showToast('error', 'Error', e.message));
+        ">Save Coupon</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MULTI-CHANNEL NOTIFICATION DRAWER OVERLAY
+       ========================================================================= -->
+  <div id="notifDrawerOverlay" class="notification-drawer-overlay">
+    <div class="notification-drawer">
+      <div class="notif-drawer-header">
+        <div>
+          <h3 class="font-serif">Notification Dispatcher</h3>
+          <div style="font-size: 0.75rem; color: var(--gold-primary);">Multi-Channel: WhatsApp • SMS • Email</div>
+        </div>
+        <button class="close-modal-btn" onclick="Notifications.closeDrawer()">&times;</button>
+      </div>
+
+      <div style="padding: 12px 24px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border-subtle); display: flex; gap: 8px;">
+        <button class="btn btn-sm btn-outline-gold" style="font-size: 0.75rem;" onclick="Notifications.simulateReminder('reminder_2h')">
+          Simulate 2-Hour Reminder
+        </button>
+        <button class="btn btn-sm btn-secondary" style="font-size: 0.75rem;" onclick="Notifications.simulateReminder('reminder_24h')">
+          Simulate 24-Hour Reminder
+        </button>
+      </div>
+
+      <div id="notifDrawerList" class="notif-drawer-body"></div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/slotHelper.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/customerView.js"></script>
+  <script src="js/barberView.js"></script>
+  <script src="js/adminView.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

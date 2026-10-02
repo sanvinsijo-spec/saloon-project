@@ -1,0 +1,292 @@
+/* ==========================================================================
+   THE NOBLE CUT - SHARED COMPONENTS & INTERACTIVE OVERLAYS
+   ========================================================================== */
+
+/* Toast Container & Cards */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--gold-primary);
+  border-radius: var(--radius-sm);
+  padding: 14px 20px;
+  min-width: 320px;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg), 0 0 15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.toast-success { border-left-color: #10b981; }
+.toast.toast-error { border-left-color: #ef4444; }
+.toast.toast-info { border-left-color: #38bdf8; }
+.toast.toast-warning { border-left-color: #f59e0b; }
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.toast-icon {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.toast-content {
+  flex-grow: 1;
+}
+
+.toast-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.toast-msg {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px;
+  font-size: 14px;
+}
+
+/* Multi-Channel Notification Drawer */
+.notification-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 3000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.notification-drawer-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.notification-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 440px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-gold);
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.8);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 3001;
+}
+
+.notification-drawer-overlay.open .notification-drawer {
+  transform: translateX(0);
+}
+
+.notif-drawer-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notif-drawer-body {
+  padding: 20px 24px;
+  overflow-y: auto;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notif-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  position: relative;
+  transition: var(--transition-fast);
+}
+
+.notif-card:hover {
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.notif-channel-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.tag-whatsapp { background: rgba(37, 211, 102, 0.15); color: #25d366; border: 1px solid rgba(37, 211, 102, 0.3); }
+.tag-sms { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+.tag-email { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.tag-system { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+.notif-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.notif-card-msg {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  white-space: pre-line;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.notif-card-time {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+/* Razorpay-style Mock Payment Checkout Modal */
+.razorpay-modal {
+  background: #0f131f;
+  border: 1px solid #29304d;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+}
+
+.rp-header {
+  background: #0c1022;
+  border-bottom: 1px solid #1f253d;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rp-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #3395ff;
+}
+
+.rp-amount-display {
+  text-align: right;
+}
+
+.rp-amount {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.rp-tabs {
+  display: flex;
+  background: #151a2d;
+  border-bottom: 1px solid #232a45;
+}
+
+.rp-tab {
+  flex: 1;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  color: #8b94b2;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.rp-tab.active {
+  color: #fff;
+  border-bottom: 2px solid #3395ff;
+  background: rgba(51, 149, 255, 0.06);
+}
+
+.rp-body {
+  padding: 24px;
+}
+
+.upi-qr-preview {
+  text-align: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+  width: 170px;
+  margin: 0 auto 16px;
+}
+
+.upi-apps {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.upi-app-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #1b2035;
+  border: 1px solid #2a3356;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+/* Star Rating Input */
+.star-rating {
+  display: flex;
+  gap: 6px;
+  font-size: 24px;
+  color: var(--gold-primary);
+  cursor: pointer;
+  margin: 10px 0;
+}
+
+.star-rating .star {
+  transition: transform 0.15s ease;
+}
+
+.star-rating .star:hover {
+  transform: scale(1.2);
+}
